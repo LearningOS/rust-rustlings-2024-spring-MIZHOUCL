@@ -2,7 +2,6 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -37,7 +36,22 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        self.items.push(value);
+        self.count += 1;
+        let index = self.count;
+        self.bubble_up(index);
+    }
+    fn bubble_up(&mut self, index: usize) {
+        let mut child_index = index;
+        while child_index > 1 {
+            let parent_index = self.parent_idx(child_index);
+            if (self.comparator)(&self.items[child_index], &self.items[parent_index]) {
+                self.items.swap(child_index, parent_index);
+                child_index = parent_index;
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +71,16 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left_child = self.left_child_idx(idx);
+        let right_child = self.right_child_idx(idx);
+
+        if right_child >= self.count {
+            left_child
+        } else if (self.comparator)(&self.items[left_child], &self.items[right_child]) {
+            left_child
+        } else {
+            right_child
+        }
     }
 }
 
@@ -84,8 +106,31 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            None
+        } else {
+            let result = self.items.swap_remove(1);
+            self.count -= 1;
+            self.bubble_down(1);
+            Some(result)
+        }
+    }
+}
+
+impl<T> Heap<T>
+    where
+        T: Default,
+{
+    fn bubble_down(&mut self, mut index: usize) {
+        while self.children_present(index) {
+            let smallest_child_idx = self.smallest_child_idx(index);
+            if (self.comparator)(&self.items[smallest_child_idx], &self.items[index]) {
+                self.items.swap(smallest_child_idx, index);
+                index = smallest_child_idx;
+            } else {
+                break;
+            }
+        }
     }
 }
 

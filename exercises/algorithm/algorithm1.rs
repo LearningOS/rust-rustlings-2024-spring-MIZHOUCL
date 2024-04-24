@@ -2,12 +2,9 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
-
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
 use std::vec::*;
-
 #[derive(Debug)]
 struct Node<T> {
     val: T,
@@ -29,13 +26,13 @@ struct LinkedList<T> {
     end: Option<NonNull<Node<T>>>,
 }
 
-impl<T> Default for LinkedList<T> {
+impl<T:Ord + Clone> Default for LinkedList<T> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T> LinkedList<T> {
+impl<T:Ord + Clone> LinkedList<T> {
     pub fn new() -> Self {
         Self {
             length: 0,
@@ -72,11 +69,40 @@ impl<T> LinkedList<T> {
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
 		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+        let mut merged_list = LinkedList::new();
+
+        let mut node_a = list_a.start;
+        let mut node_b = list_b.start;
+
+        while let (Some(a_box), Some(b_box)) = (node_a, node_b) {
+            let a = unsafe { a_box.as_ref() };
+            let b = unsafe { b_box.as_ref() };
+
+            if a.val <= b.val {
+                merged_list.add(a.val.clone());
+                node_a = a.next;
+            } else {
+                merged_list.add(b.val.clone());
+                node_b = b.next;
+            }
         }
+
+        // Append any remaining nodes from list A or B
+        if let Some(a_box) = node_a {
+            while let Some(a_box) = node_a {
+                let a = unsafe { a_box.as_ref() };
+                merged_list.add(a.val.clone());
+                node_a = a.next;
+            }
+        } else if let Some(b_box) = node_b {
+            while let Some(b_box) = node_b {
+                let b = unsafe { b_box.as_ref() };
+                merged_list.add(b.val.clone());
+                node_b = b.next;
+            }
+        }
+
+        merged_list
 	}
 }
 
